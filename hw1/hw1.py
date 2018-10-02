@@ -20,8 +20,9 @@ def transList(string):
 
 
 # read NFA from standard input
-def stdin():
+def stdin(mode):
 	
+	# mode can be either 1 or 2 and stands for the problem number
 	num_states = int(sys.stdin.readline())
 	nfa = []
 	
@@ -37,7 +38,27 @@ def stdin():
 		temp['e'] = transList(parseLine[4])
 		nfa.append(temp)
 
-	return nfa
+	# for problem 2, should also make input lists
+	inputs = []
+	
+	if mode == 2:
+		num_inputs = int(sys.stdin.readline())
+		for i in range(num_inputs):
+			line = sys.stdin.readline()
+			line = line[:-2] # remove \r\n
+			inputs.append(line)
+	
+	return nfa, inputs
+
+
+#returns a set of final states of a given NFA
+def getNfaFinalStates(nfa):
+	finalNfa = set()
+	for i in range(len(nfa)):
+		if nfa[i]['final'] == 1:
+			finalNfa.add(i)
+	return finalNfa
+
 
 # E function
 # reachable states starting from 'states'
@@ -45,6 +66,7 @@ def stdin():
 def E(nfa, states):
 	final = set(states)
 	states = list(states)
+
 	for q in states:
 		if nfa[q]['e']!=None:
 			#states that can reach from the state q
@@ -90,9 +112,7 @@ def matchStates(qd, states):
 			return i
 	return -1
 			
-		
-def problem1():
-	nfa = stdin()
+def getDfa(nfa):
 	
 	qd = [] # Q_D
 	temp = {}
@@ -124,11 +144,8 @@ def problem1():
 				p[alp] = matchIndex
 	
 	# Then, mark the final state
-	finalNfa = set()
-	for i in range(len(nfa)):
-		if nfa[i]['final'] == 1:
-			finalNfa.add(i)
-	
+	finalNfa = getNfaFinalStates(nfa)
+
 	for p in qd:
 		# set final value 1 only if	
 		# intersection of p['states'] and finalNfa is not empty
@@ -139,6 +156,74 @@ def problem1():
 	
 	return qd
 
+def runDfa(x, dfa):
+	p = dfa[0]
+
+	for i in range(len(x)):
+		ns = p[x[i]]
+		p = dfa[ns]
+	
+	if p['final'] == 0:
+		return False
+	else:
+		return True
+
+
+def runNfa(x, nfa):
+	# list of the final states of the given NFA
+	finalNfa = getNfaFinalStates(nfa)
+	
+	# algorithm given at the pdf
+	states = E(nfa, [0])
+	for i in range(len(x)):
+		 states = delta(nfa, states, x[i])
+		 states = E(nfa, states)
+	
+	# check whether the states contain the final states of NFA
+	if len(states.intersection(finalNfa)) == 0:
+		return False
+	else:
+		return True
+
+
+######################### PROBLEM SOLVER FUNCTIONS ####################	
+
+def problem1():
+	nfa, _ = stdin(1)
+	
+	dfa = getDfa(nfa)
+
+	return dfa
+
+
+def problem2():
+	nfa, inputs = stdin(2)
+	
+	nfaResult = []
+	for x in inputs:
+		nfaResult.append(runNfa(x, nfa))
+	
+	return nfaResult
+
+
+def compareDfaNfa():
+	nfa, inputs = stdin(2)
+	dfa = getDfa(nfa) 
+	
+	dfaResult = []
+	nfaResult = []
+
+	for x in inputs:
+		d_temp = runDfa(x, dfa)
+		n_temp = runNfa(x, nfa)
+		dfaResult.append(d_temp)
+		nfaResult.append(n_temp)
+	
+	return dfa, dfaResult, nfaResult
+		
+	
+
+################ FORMAT PRINT FUNCTIONS ################
 
 # print dfa into appropriate standard output format
 def printDfa(dfa):
@@ -148,7 +233,26 @@ def printDfa(dfa):
 		print index, p['final'], p['0'], p['1'] 
 		index += 1
 
+
+# print True/False into YesNo format
+def printYesNo(tf):
+	for i in tf:
+		if i:
+			print("Yes")
+		else:
+			print("No")
+
+
 if __name__ == "__main__":
 	
+	"""
 	dfa = problem1()
+	printDfa(dfa)
+	"""
+	"""
+	tf = problem2()
+	printYesNo(tf)
+	"""
+	dfa, dr, nr = compareDfaNfa()
+	print (dr==nr)
 	printDfa(dfa)
