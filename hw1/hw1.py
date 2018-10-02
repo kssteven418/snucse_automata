@@ -23,7 +23,7 @@ def transList(string):
 def stdin():
 	
 	num_states = int(sys.stdin.readline())
-	nfa = {}
+	nfa = []
 	
 	#read line by line 
 	for i in range(num_states):
@@ -35,7 +35,7 @@ def stdin():
 		temp['0'] = transList(parseLine[2]) 
 		temp['1'] = transList(parseLine[3])
 		temp['e'] = transList(parseLine[4])
-		nfa[int(parseLine[0])] = temp
+		nfa.append(temp)
 
 	return nfa
 
@@ -92,7 +92,6 @@ def matchStates(qd, states):
 			
 		
 def problem1():
-	print('problem1')
 	nfa = stdin()
 	
 	qd = [] # Q_D
@@ -126,9 +125,9 @@ def problem1():
 	
 	# Then, mark the final state
 	finalNfa = set()
-	for s in nfa:
-		if nfa[s]['final'] == 1:
-			finalNfa.add(s)
+	for i in range(len(nfa)):
+		if nfa[i]['final'] == 1:
+			finalNfa.add(i)
 	
 	for p in qd:
 		# set final value 1 only if	
