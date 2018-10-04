@@ -245,14 +245,31 @@ def printYesNo(tf):
 
 if __name__ == "__main__":
 	
-	"""
-	dfa = problem1()
-	printDfa(dfa)
-	"""
-	"""
-	tf = problem2()
-	printYesNo(tf)
-	"""
-	dfa, dr, nr = compareDfaNfa()
-	print (dr==nr)
-	printDfa(dfa)
+	# get mode from the commandline argument
+	
+	if len(sys.argv) != 2 :
+		print "Wrong Input Format"
+		exit(0)
+
+	if sys.argv[1] not in ['1', '2', '3']:
+		print "Wrong Input Format"
+		exit(0)
+
+	mode = sys.argv[1]
+
+	#problem 1
+	if mode == '1':
+		dfa = problem1()
+		printDfa(dfa)
+	
+	#problem 2
+	elif mode == '2':
+		tf = problem2()
+		printYesNo(tf)
+	
+	#problem 3
+	elif mode == '3':
+		dfa, dr, nr = compareDfaNfa()
+		print "Result : ", dr==nr
+		print "DFA : "
+		printDfa(dfa)
