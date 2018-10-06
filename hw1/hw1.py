@@ -44,8 +44,8 @@ def stdin(mode):
 	if mode == 2:
 		num_inputs = int(sys.stdin.readline())
 		for i in range(num_inputs):
-			line = sys.stdin.readline()
-			line = line[:-2] # remove \r\n
+			line = sys.stdin.readline().split()
+			line = line[0] # remove \r\n
 			inputs.append(line)
 	
 	return nfa, inputs
@@ -64,6 +64,7 @@ def getNfaFinalStates(nfa):
 # reachable states starting from 'states'
 # through epsilon edges
 def E(nfa, states):
+	# nfa : list, states : int list
 	final = set(states)
 	states = list(states)
 
@@ -198,7 +199,6 @@ def problem1():
 
 def problem2():
 	nfa, inputs = stdin(2)
-	
 	nfaResult = []
 	for x in inputs:
 		nfaResult.append(runNfa(x, nfa))
@@ -270,6 +270,6 @@ if __name__ == "__main__":
 	#problem 3
 	elif mode == '3':
 		dfa, dr, nr = compareDfaNfa()
-		print "Result : ", dr==nr
+		print "NFA==DFA? : ", dr==nr
 		print "DFA : "
 		printDfa(dfa)
