@@ -1,7 +1,6 @@
 #!/usr/bin/python
 
 import sys
-from pprint import pprint
 
 #problem 1
 
@@ -75,11 +74,10 @@ def E(nfa, states):
 			temp = set(nfa[q]['e'])
 			
 			for p in temp:
-				if p not in final:
+				if p not in final: # not yet visited
 					states.append(p)
 			
 			final = final.union(temp)
-
 	return final
 
 
@@ -116,6 +114,7 @@ def matchStates(qd, states):
 def getDfa(nfa):
 	
 	qd = [] # Q_D
+	# initial state
 	temp = {}
 	temp['mark'] = True
 	temp['states'] = E(nfa, [0])
