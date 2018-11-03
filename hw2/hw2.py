@@ -1,0 +1,85 @@
+#!/usr/bin/python
+
+import sys
+from pprint import pprint
+
+# read NFA from standard input
+def stdin(terminals):
+	
+	# mode can be either 1 or 2 and stands for the problem number
+	num_states = int(sys.stdin.readline())
+	prod = []
+	start = ""
+
+	#read line by line 
+	for k in range(num_states):
+		line = sys.stdin.readline()
+		temp = []
+		if k==0:
+			start = line[0] # start variable
+		for i in range(len(line)):
+			if line[i].isalpha() or line[i] in terminals:
+				temp.append(line[i])
+
+		prod.append(temp)
+
+	#divide productions into single productions and non-single productions
+	
+	singleprod = []
+	multiprod = []
+
+	for p in prod:
+		#if single production and RHS is nonterminal
+		if len(p)==2: 
+			singleprod.append(p)
+		else:
+			multiprod.append(p)
+
+	# input string
+	instring = sys.stdin.readline()
+
+	return singleprod, multiprod, start, instring
+
+def cfg(single, multi, instring):
+	n = len(instring)-1 # length of the input string
+	V = []
+
+	#initialize V matrix
+	for i in range(n):
+		V.append([])
+		for j in range(n):
+			V[i].append(set())
+	
+	# init diagonal entries of V
+	for i in range(n):
+		for p in single:
+			if p[1]==instring[i]:
+				V[i][i].add(p[0])
+
+	for d_ in range(n-1):
+		d = d_+1
+		for i in range(n-d):
+			j = i+d
+			k = i
+			while k<j:
+				for p in multi:
+					if p[1] in V[i][k] and p[2] in V[k+1][j]:
+						V[i][j].add(p[0])
+				k += 1
+	return V
+
+
+def printOutput(V, instring, start):
+
+	n = len(instring)-1 # length of the input string
+	if start in V[0][n-1]:
+		print("Yes")
+	else:
+		print("No")
+
+if __name__ == "__main__":
+	terminals = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '+', '-', '*', '/', '(', ')']
+	singleprod, multiprod, start, instring = stdin(terminals)
+
+	V = cfg(singleprod, multiprod, instring)
+	printOutput(V, instring, start)

@@ -3,18 +3,21 @@
 import sys
 from pprint import pprint
 
-# read NFA from standard input
+# read productions from standard input
 def stdin(terminals):
 	
 	# mode can be either 1 or 2 and stands for the problem number
 	num_states = int(sys.stdin.readline())
 	prod = []
 	nonterminals = []
+	start = ""
 
 	#read line by line 
-	for i in range(num_states):
+	for k in range(num_states):
 		line = sys.stdin.readline()
 		temp = []
+		if k==0 :
+			start=line[0]
 		for i in range(len(line)):
 			if line[i].isalpha() or line[i] in terminals:
 				temp.append(line[i])
@@ -28,7 +31,7 @@ def stdin(terminals):
 	# where the 1st elmt is the LHS nonterminal variable
 	# ex) S:A*B -> [S, A, *, B]
 	
-	return prod, nonterminals
+	return prod, nonterminals, start
 
 
 def removeSingleProd(in_prod, nt):
@@ -225,7 +228,7 @@ def printResult(prod):
 
 if __name__ == "__main__":
 	terminals = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '+', '-', '*', '/', '(', ')']
-	in_prod, nonterminals = stdin(terminals)
+	in_prod, nonterminals, start = stdin(terminals)
 #print(in_prod)
 #print(nonterminals)
 
