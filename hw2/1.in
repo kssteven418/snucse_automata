@@ -1,0 +1,13 @@
+12
+A:B
+D:A+(B+C)
+A:C
+A:*
+D:C
+C:E
+B:D
+A:D+E
+B:3/(D+E)
+C:1
+E:3
+C:A+B
