@@ -102,22 +102,14 @@ def removeSingleProd(in_prod, nt):
 		x_connected = connected[x] # all nonterminals that are connected to x
 		#x->*y
 		for y in x_connected:
-			y_prod = multiprod[y]
-			for yp in y_prod:
-				# new production is x to yp[1:]
-				# [x] : LHS, x
-				# yp[1:] : RHS of yp
-				final_prod.append([x]+yp[1:])
+			if x != y: # ignore transition to the same variable (A=>*A)
+				y_prod = multiprod[y]
+				for yp in y_prod:
+					# new production is x to yp[1:]
+					# [x] : LHS, x
+					# yp[1:] : RHS of yp
+					final_prod.append([x]+yp[1:])
 				
-	
-	pprint(singleprod)
-	print("")
-	pprint(multiprod)
-	print("")
-	pprint(connected)
-	print("")
-	pprint(final_prod)
-
 	return final_prod
 
 
