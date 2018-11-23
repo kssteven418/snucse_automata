@@ -6,7 +6,6 @@ from pprint import pprint
 # read productions from standard input
 def stdin(terminals):
 	
-	# mode can be either 1 or 2 and stands for the problem number
 	num_states = int(sys.stdin.readline())
 	prod = []
 	nonterminals = []
@@ -16,11 +15,14 @@ def stdin(terminals):
 	for k in range(num_states):
 		line = sys.stdin.readline()
 		temp = []
-		if k==0 :
+		if k==0 : # start variable
 			start=line[0]
+			nonterminals.append(start) # lst elmt of NT list is the start variable
 		for i in range(len(line)):
-			if line[i].isalpha() or line[i] in terminals:
+			# if alphabet(non-terminal) or terminal
+			if line[i].isalpha() or line[i] in terminals: 
 				temp.append(line[i])
+				# construct the non-ovelapping nonterminal list
 				if line[i].isalpha() and line[i] not in nonterminals:
 					nonterminals.append(line[i])
 
@@ -46,11 +48,12 @@ def removeSingleProd(in_prod, nt):
 		singleprod[x] = []
 		multiprod[x] = []
 
-	#separate and arrange productions
+	#separate productions and arrange into dictionary
 	for prod in in_prod:
 		#if single production and RHS is nonterminal
 		if len(prod)==2 and prod[1] in nt: 
 			singleprod[prod[0]].append(prod)
+		#multi-production or simgle production with a terminal RHS
 		else:
 			multiprod[prod[0]].append(prod)
 	
@@ -70,7 +73,7 @@ def removeSingleProd(in_prod, nt):
 	keepIter = True
 	while keepIter:
 		keepIter = False
-		for x in connected:
+		for x in nt:
 			# old connection of nonterminal x
 			old_connection = set(connected[x]) 
 			# new connection of nonterminal x
@@ -82,7 +85,8 @@ def removeSingleProd(in_prod, nt):
 				new_connection = new_connection.union(connected[y])
 			
 			#if the new_connection and the old_connection are different,
-			#continue the interation
+			#the reachable set of nonterminals for x has changed.
+			#Hence, continue the interation
 			if len(new_connection-old_connection)!=0:
 				keepIter=True
 			connected[x] = new_connection
@@ -98,20 +102,14 @@ def removeSingleProd(in_prod, nt):
 		x_connected = connected[x] # all nonterminals that are connected to x
 		#x->*y
 		for y in x_connected:
-			y_prod = multiprod[y]
-			for yp in y_prod:
-				# new production is x to yp[1:]
-				final_prod.append([x]+yp[1:])
-	
-	"""
-	pprint(singleprod)
-	print("")
-	pprint(multiprod)
-	print("")
-	pprint(connected)
-	print("")
-	pprint(final_prod)
-	"""
+			if x != y: # ignore transition to the same variable (A=>*A)
+				y_prod = multiprod[y]
+				for yp in y_prod:
+					# new production is x to yp[1:]
+					# [x] : LHS, x
+					# yp[1:] : RHS of yp
+					final_prod.append([x]+yp[1:])
+				
 	return final_prod
 
 
@@ -120,32 +118,18 @@ def removeSingleProd(in_prod, nt):
 # if terminal is not operator (num), then return itself
 def renameTerminal(t):
 	if t=='+':
-		return 'a'
+		return 'a0'
 	if t=='-':
-		return 'b'
+		return 'b0'
 	if t=='*':
-		return 'c'
+		return 'c0'
 	if t=='/':
-		return 'd'
+		return 'd0'
 	if t=='(':
-		return 'e'
+		return 'e0'
 	if t==')':
-		return 'f'
+		return 'f0'
 	return t
-
-#helper function
-#divide a given production into multiple productions 
-#having at most two terminals
-#and return them as a list
-def divideProd(prod, num_dict):
-	if len(prod)==3:
-		return [prod]
-	new_name = '<'+prod[0]+num_dict[prod[0]]+'>'
-	num_dict[prod[0]] += 1
-	new_prod = [prod[0], new_name, prod[-1]]
-	rec_prod = [new_name] + prod[2:]
-	print(new_name)
-	return [new_prod]+divideProd(rec_prod, num_dict)
 
 # build final Chomsky standard form
 # productions : list productions with no single productions
@@ -158,7 +142,7 @@ def buildStandard(productions, nt, t) :
 	for p in productions:
 		new_prod.append(list(p))
 
-	# for keeping new terminal-producing productiosn, such as <a>->+
+	# for keeping new terminal-producing productions, such as <a>->+
 	terminals = []
 	terminal_prods = []
 	
@@ -174,7 +158,7 @@ def buildStandard(productions, nt, t) :
 		p[0] = '<'+p[0]+'>'
 		
 		#rename RHS
-		#if the length is 1, then the RHS is a single terminal
+		#if the length is 2, then the RHS is a single terminal
 		if len(p)==2 :
 			final_prod.append(p)
 			continue
@@ -184,15 +168,17 @@ def buildStandard(productions, nt, t) :
 			if p[i] in t: # if terminal
 				# if the terminal is shown first time
 				# make additional terminal-producing production
+				# for example, <1>->1
 				if p[i] not in terminals: 
 					terminals.append(p[i])
 					temp = ['<'+renameTerminal(p[i])+'>', p[i]]
 					terminal_prods.append(temp)
 				p[i] = '<'+renameTerminal(p[i])+'>'
 
-			else : # if nonterminal, simple rename it into <NT> format
+			else : # if nonterminal, simply rename it into <NT> format
 				p[i] = '<'+p[i]+'>'
 		
+
 		# then divide the RHS so that RHS has only two nonterminals
 		divided = []
 		test = 0
@@ -200,13 +186,17 @@ def buildStandard(productions, nt, t) :
 			if len(p)==3:
 				divided.append(p)
 				break
+			# <A>-><B><C><D> into
+			# <A>-><C0><D> and <C0>-><B><D>
+			# C0 : new_name
 			new_name = "<C"+str(num)+">"
 			num += 1
 			# group front n-1 productions into new_name
-			divided.append([p[0], new_name, p[-1]])
+			divided.append([p[0], new_name, p[-1]]) # add <A>-><C0><D> 
 			# new production that expand new_name into n-1 productions
-			p = [new_name] + p[1:-1]
-		
+			p = [new_name] + p[1:-1] # modify production into <C0>-><B><D>
+	
+		#after division, append the result to the final production list
 		final_prod = final_prod + divided	
 	
 	# merge the terminal-producing productions
@@ -229,13 +219,6 @@ def printResult(prod):
 if __name__ == "__main__":
 	terminals = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '+', '-', '*', '/', '(', ')']
 	in_prod, nonterminals, start = stdin(terminals)
-#print(in_prod)
-#print(nonterminals)
-
 	noSingleProd = removeSingleProd(in_prod, nonterminals)
-#pprint(noSingleProd)
-	
 	finalProd = buildStandard(noSingleProd, nonterminals, terminals)
-#pprint(finalProd)
-
 	printResult(finalProd)
