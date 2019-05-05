@@ -45,7 +45,7 @@ def stdin():
 	temp = sys.stdin.readline()
 	instrings = []
 
-	# debugging mode
+	# debugging mode (independant from the normal input format)
 	if temp[0]=='D':
 		n_in = int(sys.stdin.readline())	
 		
@@ -152,8 +152,8 @@ if __name__ == "__main__":
 	var, num_states, stop_state, transition, instrings = stdin()
 	for instring in instrings:
 		outstring = outputstring(tm(stop_state, transition, instring))
-		i1, i2 = unary_conv(instring, 2)
+	#	i1, i2 = unary_conv(instring, 2)
 	#	print(i1, i2)
-		print(i1)
-#		print(outstring)
-		print(unary_conv(outstring, 1))
+	#	print(i1)
+		print(outstring)
+	#	print(unary_conv(outstring, 1))
